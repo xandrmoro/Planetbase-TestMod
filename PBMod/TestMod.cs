@@ -34,6 +34,8 @@ namespace PBMod
 
     class ModuleTypeOxygenTank : ModuleType
     {
+        private PBMod mod;
+
         public static Mesh LoadObjFromFile(string AbsolutePath)
         {
             Mesh mesh = null;
@@ -53,6 +55,7 @@ namespace PBMod
         int mOxygenStorageCapacity;
         public ModuleTypeOxygenTank(PBMod mod)
         {
+            this.mod = mod;
             this.mIcon = Utils.LoadPNG(mod, @"BuildingIcon.png");//Todo: add a method to do this automagically from the mod's folder
             this.mPowerGeneration = -1000;
             this.mExterior = false;
@@ -67,43 +70,14 @@ namespace PBMod
             this.mCost = new ResourceAmounts();
             this.mFlags = 16 + 32 + 2048;
             this.mLayoutType = LayoutType.Circular;
-
-            GameObject moduleObject = UnityEngine.Object.Instantiate<GameObject>(ResourceUtil.loadPrefab("Prefabs/Modules/PrefabBioDome2"));
-
-            foreach (var mesh in moduleObject.GetComponentsInChildren<MeshFilter>())
-            {
-                if (mesh.name == "bio_dome_2_translucent")
-                {
-                    mesh.mesh = LoadObjFromFile(mod.ModPath + "Cube.obj");
-                    Debug.Log("Replaced");
-                }
-
-                Debug.Log(mesh);
-            }
-
-            foreach (var renderer in moduleObject.GetComponentsInChildren<MeshRenderer>())
-            {
-                foreach (var material in renderer.materials)
-                {
-                    //if (material.name == "MaterialBioDome (Instance)")
-                    //{
-                    //    var tex = Utils.LoadPNG(mod, "bio_dome_translucent_df.tex.dds");
-                    //    material.SetTexture("_MainTex", null);
-                    //    material.SetTexture("_BumpMap", null);
-                    //    Debug.Log("Replaced");
-                    //}
-                    
-                    Debug.Log($"{material.name} tex: {material.mainTexture} shader: {material.shader} ");
-                }
-            }
         }
 
         public override ResourceAmounts calculateCost(int sizeIndex)
         {
             ResourceAmounts resources = new ResourceAmounts();
 
-            resources.add(TypeList<ResourceType, ResourceTypeList>.find<Metal>(), sizeIndex * 2);
-            resources.add(TypeList<ResourceType, ResourceTypeList>.find<Bioplastic>(), sizeIndex * 3);
+            resources.add(TypeList<ResourceType, ResourceTypeList>.find<Metal>(), 1);
+            resources.add(TypeList<ResourceType, ResourceTypeList>.find<Bioplastic>(), 1);
 
             return resources;
         }
@@ -111,6 +85,30 @@ namespace PBMod
         public override GameObject loadPrefab(int sizeIndex)
         {
             GameObject moduleObject = UnityEngine.Object.Instantiate<GameObject>(ResourceUtil.loadPrefab("Prefabs/Modules/PrefabBioDome" + (sizeIndex + 1)));
+
+            foreach (var mesh in moduleObject.GetComponentsInChildren<MeshFilter>())
+            {
+                if (mesh.name == "bio_dome_2_translucent")
+                {
+                    mesh.mesh = LoadObjFromFile(mod.ModPath + "test.obj");
+                }
+            }
+
+            foreach (var renderer in moduleObject.GetComponentsInChildren<MeshRenderer>())
+            {
+                foreach (var material in renderer.materials)
+                {
+                    if (material.name == "MaterialBioDome (Instance)")
+                    {
+                        material.SetTexture("_OpacityTex", Utils.LoadPNG(mod, "test_op.png"));
+                        //material.SetTexture("_OpacityTex", Utils.LoadPNG(mod, null));
+                        material.SetTexture("_BumpMap", Utils.LoadPNG(mod, "test_bm.png"));
+                        //material.SetTexture("_BumpMap", Utils.LoadPNG(mod, null));
+                        material.SetTexture("_MainTex", Utils.LoadPNG(mod, "test_df.png"));
+                        //material.SetTexture("_MainTex", Utils.LoadPNG(mod, null));
+                    }
+                }
+            }
 
             moduleObject.calculateSmoothMeshRecursive(ModuleType.mMeshes);
             if (moduleObject.GetComponent<Collider>() != null)

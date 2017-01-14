@@ -62,6 +62,15 @@
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\BuildingIcon.png" />
+    <Content Include="Resources\test_bm.png" />
+    <Content Include="Resources\test_df.png" />
+    <Content Include="Resources\test_op.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test.obj" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy $(TargetDir)$(TargetFileName) %25userprofile%25\Documents\Planetbase\Mods
