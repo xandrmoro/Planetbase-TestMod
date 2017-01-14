@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Planetbase;
 using PlanetbaseFramework;
 using UnityEngine;
+using System.IO;
 
 namespace PBMod
 {
@@ -33,6 +34,22 @@ namespace PBMod
 
     class ModuleTypeOxygenTank : ModuleType
     {
+        public static Mesh LoadObjFromFile(string AbsolutePath)
+        {
+            Mesh mesh = null;
+            byte[] fileData;
+
+            if (File.Exists(AbsolutePath))
+            {
+                fileData = File.ReadAllBytes(AbsolutePath);
+                mesh = new Mesh();
+                var objImporter = new ObjImporter();
+                mesh = objImporter.ImportFile(AbsolutePath); //..this will auto-resize the texture dimensions.
+            }
+
+            return mesh;
+        }
+
         int mOxygenStorageCapacity;
         public ModuleTypeOxygenTank(PBMod mod)
         {
@@ -51,7 +68,34 @@ namespace PBMod
             this.mFlags = 16 + 32 + 2048;
             this.mLayoutType = LayoutType.Circular;
 
-            
+            GameObject moduleObject = UnityEngine.Object.Instantiate<GameObject>(ResourceUtil.loadPrefab("Prefabs/Modules/PrefabBioDome2"));
+
+            foreach (var mesh in moduleObject.GetComponentsInChildren<MeshFilter>())
+            {
+                if (mesh.name == "bio_dome_2_translucent")
+                {
+                    mesh.mesh = LoadObjFromFile(mod.ModPath + "Cube.obj");
+                    Debug.Log("Replaced");
+                }
+
+                Debug.Log(mesh);
+            }
+
+            foreach (var renderer in moduleObject.GetComponentsInChildren<MeshRenderer>())
+            {
+                foreach (var material in renderer.materials)
+                {
+                    //if (material.name == "MaterialBioDome (Instance)")
+                    //{
+                    //    var tex = Utils.LoadPNG(mod, "bio_dome_translucent_df.tex.dds");
+                    //    material.SetTexture("_MainTex", null);
+                    //    material.SetTexture("_BumpMap", null);
+                    //    Debug.Log("Replaced");
+                    //}
+                    
+                    Debug.Log($"{material.name} tex: {material.mainTexture} shader: {material.shader} ");
+                }
+            }
         }
 
         public override ResourceAmounts calculateCost(int sizeIndex)
